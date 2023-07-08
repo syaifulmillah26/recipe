@@ -66,74 +66,67 @@ describe Recipe do
     expect(pancake_recipe.method_steps).to eq ['Mix the ingredients']
   end
 
-  context 'when name is empty' do
-    def recipe_empty
-      Recipe.describe do
-        recipe '' do
-          ingredient 'Tofu'
-          ingredient 'White miso paste'
+  context 'with validation' do
+    it 'returns error when name is empty' do
+      expect do
+        Recipe.describe do
+          recipe '' do
+            ingredient 'Tofu'
+            ingredient 'White miso paste'
 
-          method do
-            step 'Mix miso paste into boiling water'
-            step 'Add tofu and serve'
+            method do
+              step 'Mix miso paste into boiling water'
+              step 'Add tofu and serve'
+            end
           end
         end
-      end
+      end.to raise_error('name cannot be blank')
     end
 
-    it 'returns error' do
-      expect { recipe_empty }.to raise_error('name cannot be blank')
-    end
-  end
-
-  context 'when ingredient is not given' do
-    def recipe_empty
-      Recipe.describe do
-        recipe 'Miso Soup2' do
-          method do
-            step 'Mix miso paste into boiling water'
-            step 'Add tofu and serve'
+    it 'returns error when ingredient is empty' do
+      expect do
+        Recipe.describe do
+          recipe 'Miso Soup2' do
+            method do
+              step 'Mix miso paste into boiling water'
+              step 'Add tofu and serve'
+            end
           end
         end
-      end
+      end.to raise_error('please add at least one ingredient')
     end
 
-    it 'returns error' do
-      expect { recipe_empty }.to raise_error('please add at least one ingredient')
+    it 'returns error when step is not given' do
+      expect do
+        Recipe.describe do
+          recipe 'Miso Soup' do
+            ingredient 'Tofu'
+            ingredient 'White miso paste'
+          end
+        end
+      end.to raise_error('please add at least one step')
     end
 
     it "doesn't store an invalid recipe" do
-      expect { recipe_empty }.to raise_error('please add at least one ingredient')
+      expect do
+        Recipe.describe do
+          recipe 'Miso Soup2' do
+            method do
+              step 'Mix miso paste into boiling water'
+              step 'Add tofu and serve'
+            end
+          end
+        end
+      end.to raise_error('please add at least one ingredient')
 
       recipe_names = Recipe.list_recipes
       expect(recipe_names).not_to include('Miso Soup2')
     end
-  end
 
-  context 'when step is not given' do
-    def recipe_empty
-      Recipe.describe do
-        recipe 'Miso Soup' do
-          ingredient 'Tofu'
-          ingredient 'White miso paste'
-        end
-      end
-    end
-
-    it 'returns error' do
-      expect { recipe_empty }.to raise_error('please add at least one step')
-    end
-  end
-
-  context 'when step is not given' do
-    def recipe_empty
-      Recipe.describe do
-        recipe('') {}
-      end
-    end
-
-    it 'returns error' do
-      expect { recipe_empty }.to raise_error(
+    it 'show all error messages' do
+      expect do
+        Recipe.describe { recipe('') {} }
+      end.to raise_error(
         'name cannot be blank, please add at least one ingredient, please add at least one step'
       )
     end

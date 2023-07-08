@@ -32,6 +32,8 @@ class Recipe
   def self.recipe(name, &block)
     recipe = Recipe.new(name) # create recipe object
     recipe.instance_eval(&block) # execute code block within a context of object
+    raise recipe.send(:error_message) unless recipe.valid?
+
     @recipes[name] = recipe # store to class variable
   end
 
@@ -53,5 +55,23 @@ class Recipe
 
   def remove_step(name)
     @method_steps.delete(name)
+  end
+
+  def valid?
+    add_error('name cannot be blank') if @name.empty?
+    add_error('please add at least one ingredient') if @ingredients.empty?
+    add_error('please add at least one step') if @method_steps.empty?
+
+    @errors.empty?
+  end
+
+  private
+
+  def add_error(name)
+    @errors << name
+  end
+
+  def error_message
+    @errors.join(', ')
   end
 end
